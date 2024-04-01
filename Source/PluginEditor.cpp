@@ -8,33 +8,64 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+//==============================================================================
+JammerEditor::JammerEditor(JammerProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p),
+    gainSlider([&](float value) { handleGainChange(value);  })
+{
+    addAndMakeVisible(horizontalMeterL);
+    addAndMakeVisible(horizontalMeterR);
+    addAndMakeVisible(gainSlider);
+    setSize(600, 600);
+
+    startTimerHz(24);
+}
+
+JammerEditor::~JammerEditor()
+{
+}
+
 
 //==============================================================================
-NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+
+void JammerEditor::timerCallback()
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    horizontalMeterL.setLevel(audioProcessor.getRmsValue(0));
+    horizontalMeterR.setLevel(audioProcessor.getRmsValue(1));
+
+    horizontalMeterL.repaint();
+    horizontalMeterR.repaint();
 }
 
-NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
+
+void JammerEditor::paint(juce::Graphics& g)
 {
+    Random random;
+    int red = random.nextInt(256);
+    int green = random.nextInt(256);
+    int blue = random.nextInt(256);
+
+    Colour randomColor(red, green, blue);
+
+    g.fillAll(randomColor);
 }
 
-//==============================================================================
-void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
+void JammerEditor::resized()
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    int width = getWidth();
+    int height = getHeight();
+    horizontalMeterL.setBounds(width - 250, height - 50, 200, 15);
+    horizontalMeterR.setBounds(width - 250, height - 30, 200, 15);
 
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    // Set the parameters for the sliders
+    int sliderWidth = 100;
+    int sliderHeight = 200;
+    int interval = 10;
+    int startX = 50;
+    int startY = 10;
+
+    Array<Gui::Zlider*> gainSlidersArray;
+    gainSlidersArray.add(&gainSlider);
+    Gui::sliderStack(gainSlidersArray, interval, sliderWidth, sliderHeight, startX, startY);
 }
 
-void NewProjectAudioProcessorEditor::resized()
-{
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-}

@@ -10,24 +10,35 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "Component/HorizontalMeter.h"
+#include "Component/Slider.h"
+#include "Component/Stack.h"
 
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
+class JammerEditor  : public juce::AudioProcessorEditor, public Timer
 {
 public:
-    NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
-    ~NewProjectAudioProcessorEditor() override;
+    JammerEditor (JammerProcessor&);
+    ~JammerEditor() override;
 
     //==============================================================================
-    void paint (juce::Graphics&) override;
+    void timerCallback() override;
+    void paint(juce::Graphics&) override;
     void resized() override;
+
+    /* Sliders */
+    void handleGainChange(float value);
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    NewProjectAudioProcessor& audioProcessor;
+    JammerProcessor& audioProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
+    Gui::HorizontalMeter horizontalMeterL, horizontalMeterR;
+    Gui::Zlider gainSlider;
+
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JammerEditor)
 };
