@@ -11,11 +11,23 @@
 //==============================================================================
 JammerEditor::JammerEditor(JammerProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p),
-    gainSlider([&](float value) { handleGainChange(value);  })
+    gainSlider([&](float value) { handleGainChange(value);  }),
+    driveKnob([&](float value) { handleDriveChange(value);  }),
+    rangeKnob([&](float value) { handleRangeChange(value);  }),
+    blendKnob([&](float value) { handleBlendChange(value);  })
 {
     addAndMakeVisible(horizontalMeterL);
     addAndMakeVisible(horizontalMeterR);
     addAndMakeVisible(gainSlider);
+    addAndMakeVisible(driveKnob);
+    addAndMakeVisible(rangeKnob);
+    addAndMakeVisible(blendKnob);
+
+    //driveAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "drive", driveKnob.get()->getSlider());
+    //rangeAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "range", rangeKnob.get()->getSlider());
+    //blendAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "blend", blendKnob.get()->getSlider());
+    //volumeAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "volume", volumeKnob.get()->getSlider());
+
     setSize(600, 600);
 
     startTimerHz(24);
@@ -66,6 +78,9 @@ void JammerEditor::resized()
 
     Array<Gui::Zlider*> gainSlidersArray;
     gainSlidersArray.add(&gainSlider);
+    gainSlidersArray.add(&driveKnob);
+    gainSlidersArray.add(&rangeKnob);
+    gainSlidersArray.add(&blendKnob);
     Gui::sliderStack(gainSlidersArray, interval, sliderWidth, sliderHeight, startX, startY);
 }
 

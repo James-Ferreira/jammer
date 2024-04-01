@@ -30,6 +30,10 @@ public:
 
     /* Sliders */
     void handleGainChange(float value);
+    void handleDriveChange(float value);
+    void handleRangeChange(float value);
+    void handleBlendChange(float value);
+
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -37,8 +41,10 @@ private:
     JammerProcessor& audioProcessor;
 
     Gui::HorizontalMeter horizontalMeterL, horizontalMeterR;
-    Gui::Zlider gainSlider;
-
+    Gui::GainSlider gainSlider;
+    Gui::DriveSlider driveKnob;
+    Gui::RangeSlider rangeKnob;
+    Gui::BlendSlider blendKnob;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JammerEditor)
 };

@@ -56,11 +56,18 @@ public:
     // level meter
     float getRmsValue(const int channel) const;
 
-    // gain slider
+    // slider
     double rawVolume;
+    double drive;
+    double range;
+    double blend;
+
+    // state
+    AudioProcessorValueTreeState& getState();
 
 private:
     LinearSmoothedValue<float> rmsLevelLeft, rmsLevelRight;
+    std::unique_ptr<AudioProcessorValueTreeState> state;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JammerProcessor)
 };

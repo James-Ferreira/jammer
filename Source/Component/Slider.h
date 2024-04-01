@@ -9,19 +9,21 @@ namespace Gui
     public:
         using OnChange = std::function<void(float)>;
 
-        Zlider(OnChange cb) : onChange(std::move(cb))
+        static constexpr int defaultWidth = 200;
+        static constexpr int defaultHeight = 400;
+
+        Zlider(OnChange cb, Slider::SliderStyle sliderStyle, const String& labelText)
+            : onChange(std::move(cb))
         {
-            setSize(200, 400);
+            setSize(defaultWidth, defaultHeight);
+
             addAndMakeVisible(slider);
-            slider.setSliderStyle(juce::Slider::LinearVertical);
+            slider.setSliderStyle(sliderStyle);
             slider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
-            slider.setRange(-48.0, 12.0);
-            slider.setValue(-1);
             slider.addListener(this);
 
-
             addAndMakeVisible(label);
-            label.setText("Gainzz", juce::NotificationType::dontSendNotification);
+            label.setText(labelText, juce::NotificationType::dontSendNotification);
             label.setJustificationType(juce::Justification::centred);
 
             slider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
@@ -52,9 +54,66 @@ namespace Gui
             }
         }
 
+        void setSliderRange(float min, float max) {
+            slider.setRange(min, max);
+        }
+
+        void setSliderValue(float value) {
+            slider.setValue(value);
+        }
+
+        juce::Slider& getSlider() noexcept {
+            return slider;
+        }
+
     private:
         OnChange onChange;
         Slider slider;
         Label label;
     };
+
+    class GainSlider : public Zlider
+    {
+    public:
+        GainSlider(OnChange cb)
+            : Zlider(cb, Slider::LinearVertical, "Gain")
+        {
+            setSliderRange(-48.0, 12.0);
+            setSliderValue(-1);
+        }
+    };
+
+    class DriveSlider : public Zlider
+    {
+    public:
+        DriveSlider(OnChange cb)
+            : Zlider(cb, Slider::Rotary, "Drive")
+        {
+            setSliderRange(0.f, 1.f);
+            setSliderValue(1);
+        }
+    };
+
+    class BlendSlider : public Zlider
+    {
+    public:
+        BlendSlider(OnChange cb)
+            : Zlider(cb, Slider::Rotary, "Blend")
+        {
+            setSliderRange(0.f, 1.f);
+            setSliderValue(1.f);
+        }
+    };
+
+    class RangeSlider : public Zlider
+    {
+    public:
+        RangeSlider(OnChange cb)
+            : Zlider(cb, Slider::Rotary, "Range")
+        {
+            setSliderRange(0.f, 1.f);
+            setSliderValue(1.f);
+        }
+    };
+
 }

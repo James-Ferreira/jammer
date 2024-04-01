@@ -22,6 +22,7 @@ JammerProcessor::JammerProcessor()
                        )
 #endif
 {
+    state = std::make_unique<AudioProcessorValueTreeState>(*this, nullptr);
 }
 
 JammerProcessor::~JammerProcessor()
@@ -137,14 +138,16 @@ void JammerProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // gain 
+    
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer(channel);
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
-            channelData[sample] *= rawVolume;
+            float cleanSig = channelData[sample];
+            channelData[sample] *= drive * range;
+            channelData[sample] = (((((2.f / float_Pi) * atan(channelData[sample])) * blend) + (cleanSig * (1.f / blend))) / 2) * rawVolume;
+        
         }
     }
 
@@ -166,6 +169,9 @@ void JammerProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         else
             rmsLevelRight.setCurrentAndTargetValue(value);
     }
+
+
+
 }
 
 //==============================================================================
@@ -185,12 +191,19 @@ void JammerProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    MemoryOutputStream stream(destData, false);
+    state->state.writeToStream(stream);
 }
 
 void JammerProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    ValueTree tree = ValueTree::readFromData(data, sizeInBytes);
+
+    if (tree.isValid()) {
+        state->state = tree;
+    }
 }
 
 float JammerProcessor::getRmsValue(const int channel) const
@@ -202,6 +215,11 @@ float JammerProcessor::getRmsValue(const int channel) const
         return rmsLevelRight.getCurrentValue();
 
     return 0.0f;
+}
+
+AudioProcessorValueTreeState& JammerProcessor::getState()
+{
+    return *state;
 }
 
 //==============================================================================
